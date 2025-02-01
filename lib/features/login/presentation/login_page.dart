@@ -4,6 +4,7 @@ import 'package:profile_app/features/login/data/login_data.dart';
 import 'package:profile_app/features/login/data/login_ui_type.dart';
 import 'package:profile_app/features/login/presentation/login_bloc.dart';
 import 'package:profile_app/widgets/q_button.dart';
+import 'package:profile_app/widgets/q_dialog.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,7 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
-  final _confirmController = TextEditingController();
 
   @override
   void initState() {
@@ -30,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
     _emailController.text = data.email;
     _passwordController.text = data.password;
     _nameController.text = data.name;
-    _confirmController.text = data.confirmCode;
   }
 
   @override
@@ -41,6 +40,11 @@ class _LoginPageState extends State<LoginPage> {
         if (state is LoginStateMessage) {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(state.message)));
+        }
+        if (state is LoginStateDialog) {
+          showDialog(
+              context: context,
+              builder: (context) => QDialog(state.title, state.message));
         }
       }, builder: (context, state) {
         if (state is LoginStateLoading) {
@@ -64,8 +68,6 @@ class _LoginPageState extends State<LoginPage> {
                   _registration()
                 else if (uiType is LoginUiAuth)
                   _auth()
-                else if (uiType is LoginUiConfirm)
-                  _confirm()
                 else if (uiType is LoginUiRestore)
                   _restore(),
                 const Expanded(child: SizedBox()),
@@ -85,7 +87,9 @@ class _LoginPageState extends State<LoginPage> {
         _passwordTextField(),
         _nameTextField(),
         const SizedBox(height: 20),
-        QButton('Register', () {}),
+        QButton('Register', () {
+          _bloc.add(LoginEventRegister());
+        }),
         const SizedBox(height: 40),
         _changeTypeButton('Have an account?', LoginUiAuth())
       ],
@@ -98,18 +102,12 @@ class _LoginPageState extends State<LoginPage> {
         _emailTextField(),
         _passwordTextField(),
         const SizedBox(height: 20),
-        QButton('Login', () {}),
+        QButton('Login', () {
+          _bloc.add(LoginEventAuth());
+        }),
         const SizedBox(height: 40),
         _changeTypeButton('Don\'t have an account?', LoginUiRegister()),
         _changeTypeButton('Restore password', LoginUiRestore())
-      ],
-    );
-  }
-
-  Widget _confirm() {
-    return Column(
-      children: [
-        _confirmTextField(),
       ],
     );
   }
@@ -119,7 +117,9 @@ class _LoginPageState extends State<LoginPage> {
       children: [
         _emailTextField(),
         const SizedBox(height: 20),
-        QButton('Send code', () {}),
+        QButton('Send code', () {
+          _bloc.add(LoginEventRestore());
+        }),
         const SizedBox(height: 40),
         _changeTypeButton('Go back', LoginUiAuth()),
       ],
@@ -144,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _passwordTextField() {
-    return _textField(_passwordController, 'Password', (text) {
+    return _textField(_passwordController, 'Password', isPassword: true, (text) {
       _bloc.add(LoginEventInputPassword(password: text));
     });
   }
@@ -152,12 +152,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget _nameTextField() {
     return _textField(_nameController, 'Name', (text) {
       _bloc.add(LoginEventInputName(name: text));
-    });
-  }
-
-  Widget _confirmTextField() {
-    return _textField(_confirmController, 'Confirm', (text) {
-      _bloc.add(LoginEventInputConfirmCode(confirmCode: text));
     });
   }
 

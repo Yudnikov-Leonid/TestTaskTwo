@@ -4,8 +4,6 @@ class LoginUiRegister extends LoginUiType {}
 
 class LoginUiAuth extends LoginUiType {}
 
-class LoginUiConfirm extends LoginUiType {}
-
 class LoginUiRestore extends LoginUiType {}
 
 /// fields:

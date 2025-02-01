@@ -5,7 +5,6 @@ class LoginData {
   final String email;
   final String password;
   final String name;
-  final String confirmCode;
   final String restore;
 
   LoginData({
@@ -13,7 +12,6 @@ class LoginData {
     required this.email,
     required this.password,
     required this.name,
-    required this.confirmCode,
     required this.restore,
   });
 
@@ -30,7 +28,6 @@ class LoginData {
       email: email ?? this.email,
       password: password ?? this.password,
       name: name ?? this.name,
-      confirmCode: confirmCode ?? this.confirmCode,
       restore: restore ?? this.restore,
     );
   }
