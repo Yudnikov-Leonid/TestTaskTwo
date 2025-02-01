@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "230421320767",
+    "project_id": "profileapp-66763",
+    "storage_bucket": "profileapp-66763.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:230421320767:android:fe3f1301d5855b201f548a",
+        "android_client_info": {
+          "package_name": "com.example.profile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRZBbHjS2GQKPDFRDeTP3O9QHPRvaPvjU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
