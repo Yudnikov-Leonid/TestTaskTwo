@@ -1,10 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:profile_app/features/login/data/login_data.dart';
 import 'package:profile_app/features/login/data/login_ui_type.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(LoginStateInitial()) {
+  LoginBloc() : super(LoginStateLoading()) {
     on<LoginEventInitial>(onLoginEventInitial);
     on<LoginEventChangeUiType>(onLoginEventChangeUiType);
 
@@ -15,6 +16,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginEventRegister>(onLoginEventRegister);
     on<LoginEventAuth>(onLoginEventAuth);
     on<LoginEventRestore>(onLoginEventRestore);
+    on<LoginEventLogout>(onLoginEventLogout);
   }
 
   LoginData _data = LoginData(
@@ -69,7 +71,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _data.email, password: _data.password);
       if (cred.user?.emailVerified ?? false) {
-        // SUCCESS
+        _data = _data.copyWith(
+            uiType: LoginUiRegister(),
+            email: '',
+            password: '',
+            name: '',
+            restore: '');
       } else {
         await FirebaseAuth.instance.signOut();
         emit(LoginStateMessage('Verify your email'));
@@ -90,6 +97,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginStateBase(_data));
       return;
     }
+  }
+
+  void onLoginEventLogout(
+      LoginEventLogout event, Emitter<LoginState> emit) async {
+    FirebaseAuth.instance.signOut();
+    GoogleSignIn().signOut();
   }
 
   void onLoginEventInitial(
@@ -133,6 +146,8 @@ class LoginEventRestore extends LoginEvent {}
 
 class LoginEventRegister extends LoginEvent {}
 
+class LoginEventLogout extends LoginEvent {}
+
 class LoginEventChangeUiType extends LoginEvent {
   final LoginUiType newType;
 
@@ -159,8 +174,6 @@ class LoginEventInputName extends LoginEvent {
 
 /// STATES
 abstract class LoginState {}
-
-class LoginStateInitial extends LoginState {}
 
 class LoginStateLoading extends LoginState {}
 

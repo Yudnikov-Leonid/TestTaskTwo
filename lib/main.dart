@@ -1,6 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:profile_app/features/login/presentation/login_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:profile_app/features/login/presentation/login_bloc.dart';
+import 'package:profile_app/features/main_navigator/main_navigator.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -14,9 +17,12 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(body: SafeArea(child: LoginPage())),
+      home: MultiProvider(providers: [
+        BlocProvider<LoginBloc>(
+            create: (context) => LoginBloc()..add(LoginEventInitial()))
+      ], child: const Scaffold(body: SafeArea(child: MainNavigator()))),
     );
   }
 }

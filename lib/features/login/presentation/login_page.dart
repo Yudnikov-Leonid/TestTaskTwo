@@ -14,17 +14,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  late final LoginBloc _bloc;
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
-
-  @override
-  void initState() {
-    _bloc = LoginBloc()..add(LoginEventInitial());
-    super.initState();
-  }
 
   void _updateControllers(LoginData data) {
     _emailController.text = data.email;
@@ -34,50 +26,47 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => _bloc,
-      child: BlocConsumer<LoginBloc, LoginState>(listener: (context, state) {
-        if (state is LoginStateMessage) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(state.message)));
+    return BlocConsumer<LoginBloc, LoginState>(listener: (context, state) {
+      if (state is LoginStateMessage) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(state.message)));
+      }
+      if (state is LoginStateDialog) {
+        showDialog(
+            context: context,
+            builder: (context) => QDialog(state.title, state.message));
+      }
+    }, builder: (context, state) {
+      if (state is LoginStateLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (state is LoginStateBase) {
+        if (state.updateControllers) {
+          _updateControllers(state.loginData);
         }
-        if (state is LoginStateDialog) {
-          showDialog(
-              context: context,
-              builder: (context) => QDialog(state.title, state.message));
-        }
-      }, builder: (context, state) {
-        if (state is LoginStateLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (state is LoginStateBase) {
-          if (state.updateControllers) {
-            _updateControllers(state.loginData);
-          }
-          final uiType = state.loginData.uiType;
+        final uiType = state.loginData.uiType;
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 70),
-                const Text('Profile App', style: TextStyle(fontSize: 30)),
-                const Expanded(child: SizedBox()),
-                if (uiType is LoginUiRegister)
-                  _registration()
-                else if (uiType is LoginUiAuth)
-                  _auth()
-                else if (uiType is LoginUiRestore)
-                  _restore(),
-                const Expanded(child: SizedBox()),
-              ],
-            ),
-          );
-        }
-        return const SizedBox();
-      }),
-    );
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 70),
+              const Text('Profile App', style: TextStyle(fontSize: 30)),
+              const Expanded(child: SizedBox()),
+              if (uiType is LoginUiRegister)
+                _registration()
+              else if (uiType is LoginUiAuth)
+                _auth()
+              else if (uiType is LoginUiRestore)
+                _restore(),
+              const Expanded(child: SizedBox()),
+            ],
+          ),
+        );
+      }
+      return const SizedBox();
+    });
   }
 
   Widget _registration() {
@@ -88,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
         _nameTextField(),
         const SizedBox(height: 20),
         QButton('Register', () {
-          _bloc.add(LoginEventRegister());
+          context.read<LoginBloc>().add(LoginEventRegister());
         }),
         const SizedBox(height: 40),
         _changeTypeButton('Have an account?', LoginUiAuth())
@@ -103,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
         _passwordTextField(),
         const SizedBox(height: 20),
         QButton('Login', () {
-          _bloc.add(LoginEventAuth());
+          context.read<LoginBloc>().add(LoginEventAuth());
         }),
         const SizedBox(height: 40),
         _changeTypeButton('Don\'t have an account?', LoginUiRegister()),
@@ -118,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
         _emailTextField(),
         const SizedBox(height: 20),
         QButton('Send code', () {
-          _bloc.add(LoginEventRestore());
+          context.read<LoginBloc>().add(LoginEventRestore());
         }),
         const SizedBox(height: 40),
         _changeTypeButton('Go back', LoginUiAuth()),
@@ -129,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _changeTypeButton(String text, LoginUiType uiType) {
     return TextButton(
         onPressed: () {
-          _bloc.add(LoginEventChangeUiType(newType: uiType));
+          context.read<LoginBloc>().add(LoginEventChangeUiType(newType: uiType));
         },
         style: TextButton.styleFrom(
             minimumSize: Size.zero,
@@ -139,19 +128,19 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _emailTextField() {
     return _textField(_emailController, 'Email', (text) {
-      _bloc.add(LoginEventInputEmail(email: text));
+      context.read<LoginBloc>().add(LoginEventInputEmail(email: text));
     });
   }
 
   Widget _passwordTextField() {
     return _textField(_passwordController, 'Password', isPassword: true, (text) {
-      _bloc.add(LoginEventInputPassword(password: text));
+      context.read<LoginBloc>().add(LoginEventInputPassword(password: text));
     });
   }
 
   Widget _nameTextField() {
     return _textField(_nameController, 'Name', (text) {
-      _bloc.add(LoginEventInputName(name: text));
+      context.read<LoginBloc>().add(LoginEventInputName(name: text));
     });
   }
 

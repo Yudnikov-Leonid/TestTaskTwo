@@ -20,7 +20,6 @@ class LoginData {
     String? email,
     String? password,
     String? name,
-    String? confirmCode,
     String? restore,
   }) {
     return LoginData(
