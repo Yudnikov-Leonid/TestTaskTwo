@@ -87,8 +87,7 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 20),
         QButton('Register', () {}),
         const SizedBox(height: 40),
-        const Text('Have an account?'),
-        _changeTypeButton('Auth', LoginUiAuth())
+        _changeTypeButton('Have an account?', LoginUiAuth())
       ],
     );
   }
@@ -101,8 +100,7 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 20),
         QButton('Login', () {}),
         const SizedBox(height: 40),
-        const Text('Don\'t have an account?'),
-        _changeTypeButton('Register', LoginUiRegister()),
+        _changeTypeButton('Don\'t have an account?', LoginUiRegister()),
         _changeTypeButton('Restore password', LoginUiRestore())
       ],
     );
@@ -136,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
         style: TextButton.styleFrom(
             minimumSize: Size.zero,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4)),
-        child: Text(text, style: const TextStyle(color: Colors.blue)));
+        child: Text(text, style: TextStyle(color: Colors.blue.shade600)));
   }
 
   Widget _emailTextField() {
