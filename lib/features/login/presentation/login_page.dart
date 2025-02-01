@@ -138,22 +138,31 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _emailTextField() {
-    return _textField(_emailController, 'Email');
+    return _textField(_emailController, 'Email', (text) {
+      _bloc.add(LoginEventInputEmail(email: text));
+    });
   }
 
   Widget _passwordTextField() {
-    return _textField(_passwordController, 'Password');
+    return _textField(_passwordController, 'Password', (text) {
+      _bloc.add(LoginEventInputPassword(password: text));
+    });
   }
 
   Widget _nameTextField() {
-    return _textField(_nameController, 'Name');
+    return _textField(_nameController, 'Name', (text) {
+      _bloc.add(LoginEventInputName(name: text));
+    });
   }
 
   Widget _confirmTextField() {
-    return _textField(_confirmController, 'Confirm');
+    return _textField(_confirmController, 'Confirm', (text) {
+      _bloc.add(LoginEventInputConfirmCode(confirmCode: text));
+    });
   }
 
   Widget _textField(TextEditingController controller, String hint,
+      Function(String) onTextChanged,
       {bool isPassword = false}) {
     return TextField(
       obscureText: isPassword,
@@ -161,6 +170,7 @@ class _LoginPageState extends State<LoginPage> {
       autocorrect: !isPassword,
       controller: controller,
       decoration: InputDecoration(hintText: hint),
+      onChanged: onTextChanged,
     );
   }
 }
