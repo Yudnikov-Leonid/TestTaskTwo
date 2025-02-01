@@ -63,6 +63,24 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginStateBase(_data));
       return;
     }
+
+    try {
+      emit(LoginStateLoading());
+      final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _data.email, password: _data.password);
+      if (cred.user?.emailVerified ?? false) {
+        // SUCCESS
+      } else {
+        await FirebaseAuth.instance.signOut();
+        emit(LoginStateMessage('Verify your email'));
+      }
+    } on FirebaseAuthException catch (e) {
+      emit(LoginStateMessage(e.message ?? ''));
+    } catch (e, st) {
+      print('e: $e, st: $st');
+      emit(LoginStateMessage(e.toString()));
+    }
+    emit(LoginStateBase(_data));
   }
 
   void onLoginEventRestore(
