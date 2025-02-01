@@ -5,9 +5,14 @@ import 'package:profile_app/features/login/data/login_ui_type.dart';
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc() : super(LoginStateInitial()) {
     on<LoginEventChangeUiType>(onLoginEventChangeUiType);
+    on<LoginEventInitial>(onLoginEventInitial);
+    on<LoginEventInputEmail>(onLoginEventInputEmail);
+    on<LoginEventInputPassword>(onLoginEventInputPassword);
+    on<LoginEventInputName>(onLoginEventInputName);
+    on<LoginEventInputConfirmCode>(onLoginEventInputConfirmCode);
   }
 
-  LoginData _loginData = LoginData(
+  LoginData _data = LoginData(
       uiType: LoginUiRegister(),
       email: '',
       password: '',
@@ -15,35 +20,42 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       confirmCode: '',
       restore: '');
 
+  void onLoginEventInitial(
+      LoginEventInitial event, Emitter<LoginState> emit) async {
+    emit(LoginStateBase(_data, updateControllers: true));
+  }
+
   void onLoginEventChangeUiType(
       LoginEventChangeUiType event, Emitter<LoginState> emit) async {
-    _loginData = _loginData.copyWith(uiType: event.newType);
-    emit(LoginStateBase(loginData: _loginData, updateFields: true));
+    _data = _data.copyWith(uiType: event.newType);
+    emit(LoginStateBase(_data, updateControllers: true));
   }
 
   void onLoginEventInputEmail(LoginEventInputEmail event, Emitter<LoginState> emit) async {
-    _loginData = _loginData.copyWith(email: event.email);
-    emit(LoginStateBase(loginData: _loginData));
+    _data = _data.copyWith(email: event.email);
+    emit(LoginStateBase(_data));
   }
 
   void onLoginEventInputPassword(LoginEventInputPassword event, Emitter<LoginState> emit) async {
-    _loginData = _loginData.copyWith(password: event.password);
-    emit(LoginStateBase(loginData: _loginData));
+    _data = _data.copyWith(password: event.password);
+    emit(LoginStateBase(_data));
   }
 
   void onLoginEventInputName(LoginEventInputName event, Emitter<LoginState> emit) async {
-    _loginData = _loginData.copyWith(name: event.name);
-    emit(LoginStateBase(loginData: _loginData));
+    _data = _data.copyWith(name: event.name);
+    emit(LoginStateBase(_data));
   }
 
   void onLoginEventInputConfirmCode(LoginEventInputConfirmCode event, Emitter<LoginState> emit) async {
-    _loginData = _loginData.copyWith(confirmCode: event.confirmCode);
-    emit(LoginStateBase(loginData: _loginData));
+    _data = _data.copyWith(confirmCode: event.confirmCode);
+    emit(LoginStateBase(_data));
   }
 }
 
 /// EVENTS
 abstract class LoginEvent {}
+
+class LoginEventInitial extends LoginEvent {}
 
 class LoginEventChangeUiType extends LoginEvent {
   final LoginUiType newType;
@@ -76,11 +88,18 @@ abstract class LoginState {}
 
 class LoginStateInitial extends LoginState {}
 
+class LoginStateLoading extends LoginState {}
+
+class LoginStateMessage extends LoginState {
+  final String message;
+  LoginStateMessage({required this.message});
+}
+
 class LoginStateBase extends LoginState {
   final LoginData loginData;
   /// обновлять поля ввода на значение из loginData
   /// по умолчанию false, чтобы не сеттить текст при каждой введённой букве, так как это портит опыт юзера
-  final bool updateFields;
+  final bool updateControllers;
 
-  LoginStateBase({required this.loginData, this.updateFields = false});
+  LoginStateBase(this.loginData, {this.updateControllers = false});
 }
