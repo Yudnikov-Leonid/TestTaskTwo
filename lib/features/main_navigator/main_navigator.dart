@@ -11,16 +11,15 @@ class MainNavigator extends StatefulWidget {
 }
 
 class _MainNavigatorState extends State<MainNavigator> {
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
         stream: FirebaseAuth.instance.userChanges(),
         builder: (context, snapshot) {
-          if (snapshot.data == null) {
-            return const LoginPage();
-          } else {
+          if (snapshot.data?.emailVerified ?? false) {
             return const ProfilePage();
+          } else {
+            return const LoginPage();
           }
         });
   }

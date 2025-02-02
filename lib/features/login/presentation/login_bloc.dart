@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:profile_app/core/firestore_service.dart';
 import 'package:profile_app/features/login/data/login_data.dart';
 import 'package:profile_app/features/login/data/login_ui_type.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc() : super(LoginStateLoading()) {
+  LoginBloc({required FirestoreService firestoreService})
+      : _firestoreService = firestoreService,
+        super(LoginStateLoading()) {
     on<LoginEventInitial>(onLoginEventInitial);
     on<LoginEventChangeUiType>(onLoginEventChangeUiType);
 
@@ -18,6 +21,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginEventRestore>(onLoginEventRestore);
     on<LoginEventLogout>(onLoginEventLogout);
   }
+
+  final FirestoreService _firestoreService;
 
   LoginData _data = LoginData(
       uiType: LoginUiRegister(),
@@ -39,6 +44,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _data.email, password: _data.password);
       await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+      await _firestoreService
+          .createUser(UserCreateData(name: _data.name, email: _data.email));
       await FirebaseAuth.instance.signOut();
 
       emit(LoginStateDialog('Link to verify is sent', 'Check your email'));
@@ -56,7 +63,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       print('e: $e, st: $st');
       emit(LoginStateMessage(e.toString()));
     }
-    emit(LoginStateBase(_data));
+    emit(LoginStateBase(_data, updateControllers: true));
   }
 
   void onLoginEventAuth(LoginEventAuth event, Emitter<LoginState> emit) async {

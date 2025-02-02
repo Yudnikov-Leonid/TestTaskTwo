@@ -4,11 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:profile_app/features/login/presentation/login_bloc.dart';
 import 'package:profile_app/features/main_navigator/main_navigator.dart';
 import 'package:provider/provider.dart';
+import 'di.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await di.init();
   runApp(const MainApp());
 }
 
@@ -21,7 +23,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: MultiProvider(providers: [
         BlocProvider<LoginBloc>(
-            create: (context) => LoginBloc()..add(LoginEventInitial()))
+            create: (context) => di.get<LoginBloc>()..add(LoginEventInitial()))
       ], child: const Scaffold(body: SafeArea(child: MainNavigator()))),
     );
   }
