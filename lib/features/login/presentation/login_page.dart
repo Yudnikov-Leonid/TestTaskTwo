@@ -6,6 +6,8 @@ import 'package:profile_app/features/login/presentation/login_bloc.dart';
 import 'package:profile_app/widgets/q_button.dart';
 import 'package:profile_app/widgets/q_dialog.dart';
 
+import '../../../core/presentation/ui_validator.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -17,6 +19,9 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
+  final _registrationFormKey = GlobalKey<FormState>();
+  final _authFormKey = GlobalKey<FormState>();
+  final _restoreFormKey = GlobalKey<FormState>();
 
   void _updateControllers(LoginData data) {
     _emailController.text = data.email;
@@ -70,55 +75,69 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _registration() {
-    return Column(
-      children: [
-        _emailTextField(),
-        _passwordTextField(),
-        _nameTextField(),
-        const SizedBox(height: 20),
-        QButton('Register', () {
-          context.read<LoginBloc>().add(LoginEventRegister());
-        }),
-        const SizedBox(height: 40),
-        _changeTypeButton('Have an account?', LoginUiAuth())
-      ],
+    return Form(
+      key: _registrationFormKey,
+      child: Column(
+        children: [
+          _emailTextField(),
+          _passwordTextField(),
+          _nameTextField(),
+          const SizedBox(height: 20),
+          QButton('Register', () {
+            if (!_registrationFormKey.currentState!.validate()) return;
+            context.read<LoginBloc>().add(LoginEventRegister());
+          }),
+          const SizedBox(height: 40),
+          _changeTypeButton('Have an account?', LoginUiAuth())
+        ],
+      ),
     );
   }
 
   Widget _auth() {
-    return Column(
-      children: [
-        _emailTextField(),
-        _passwordTextField(),
-        const SizedBox(height: 20),
-        QButton('Login', () {
-          context.read<LoginBloc>().add(LoginEventAuth());
-        }),
-        const SizedBox(height: 40),
-        _changeTypeButton('Don\'t have an account?', LoginUiRegister()),
-        _changeTypeButton('Restore password', LoginUiRestore())
-      ],
+    return Form(
+      key: _authFormKey,
+      child: Column(
+        children: [
+          _emailTextField(),
+          _passwordTextField(),
+          const SizedBox(height: 20),
+          QButton('Login', () {
+            if (!_authFormKey.currentState!.validate()) return;
+            context.read<LoginBloc>().add(LoginEventAuth());
+          }),
+          const SizedBox(height: 40),
+          _changeTypeButton('Don\'t have an account?', LoginUiRegister()),
+          _changeTypeButton('Restore password', LoginUiRestore())
+        ],
+      ),
     );
   }
 
   Widget _restore() {
-    return Column(
-      children: [
-        _emailTextField(),
-        const SizedBox(height: 20),
-        QButton('Send code', () {
-          context.read<LoginBloc>().add(LoginEventRestore());
-        }),
-        const SizedBox(height: 40),
-        _changeTypeButton('Go back', LoginUiAuth()),
-      ],
+    return Form(
+      key: _restoreFormKey,
+      child: Column(
+        children: [
+          _emailTextField(),
+          const SizedBox(height: 20),
+          QButton('Send code', () {
+            if (!_restoreFormKey.currentState!.validate()) return;
+            context.read<LoginBloc>().add(LoginEventRestore());
+          }),
+          const SizedBox(height: 40),
+          _changeTypeButton('Go back', LoginUiAuth()),
+        ],
+      ),
     );
   }
 
   Widget _changeTypeButton(String text, LoginUiType uiType) {
     return TextButton(
         onPressed: () {
-          context.read<LoginBloc>().add(LoginEventChangeUiType(newType: uiType));
+          context
+              .read<LoginBloc>()
+              .add(LoginEventChangeUiType(newType: uiType));
         },
         style: TextButton.styleFrom(
             minimumSize: Size.zero,
@@ -126,28 +145,51 @@ class _LoginPageState extends State<LoginPage> {
         child: Text(text, style: TextStyle(color: Colors.blue.shade600)));
   }
 
+  final _emailValidator = EmptyUiValidator(next: EmailUiValidator());
+
   Widget _emailTextField() {
-    return _textField(_emailController, 'Email', (text) {
-      context.read<LoginBloc>().add(LoginEventInputEmail(email: text));
-    });
+    return _textField(
+      _emailController,
+      'Email',
+      validation: (s) => s == null ? null : _emailValidator.isValid(s),
+      (text) {
+        context.read<LoginBloc>().add(LoginEventInputEmail(email: text));
+      },
+    );
   }
+
+  final _passwordValidator = EmptyUiValidator(next: LengthUiValidator(6));
 
   Widget _passwordTextField() {
-    return _textField(_passwordController, 'Password', isPassword: true, (text) {
-      context.read<LoginBloc>().add(LoginEventInputPassword(password: text));
-    });
+    return _textField(
+      _passwordController,
+      'Password',
+      validation: (s) => s == null ? null : _passwordValidator.isValid(s),
+      isPassword: true,
+      (text) {
+        context.read<LoginBloc>().add(LoginEventInputPassword(password: text));
+      },
+    );
   }
 
+  final _nameValidator = EmptyUiValidator(next: LengthUiValidator(4));
+
   Widget _nameTextField() {
-    return _textField(_nameController, 'Name', (text) {
-      context.read<LoginBloc>().add(LoginEventInputName(name: text));
-    });
+    return _textField(
+      _nameController,
+      'Name',
+      validation: (s) => s == null ? null : _nameValidator.isValid(s),
+      (text) {
+        context.read<LoginBloc>().add(LoginEventInputName(name: text));
+      },
+    );
   }
 
   Widget _textField(TextEditingController controller, String hint,
       Function(String) onTextChanged,
-      {bool isPassword = false}) {
-    return TextField(
+      {bool isPassword = false, String? Function(String?)? validation}) {
+    return TextFormField(
+      validator: validation,
       obscureText: isPassword,
       enableSuggestions: !isPassword,
       autocorrect: !isPassword,

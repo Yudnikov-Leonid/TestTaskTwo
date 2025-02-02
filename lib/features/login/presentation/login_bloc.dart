@@ -6,8 +6,9 @@ import 'package:profile_app/features/login/data/login_ui_type.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc({required FirestoreService firestoreService})
-      : _firestoreService = firestoreService,
+  LoginBloc({
+    required FirestoreService firestoreService,
+  })  : _firestoreService = firestoreService,
         super(LoginStateLoading()) {
     on<LoginEventInitial>(onLoginEventInitial);
     on<LoginEventChangeUiType>(onLoginEventChangeUiType);
@@ -33,12 +34,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void onLoginEventRegister(
       LoginEventRegister event, Emitter<LoginState> emit) async {
-    if (_data.email.isEmpty || _data.password.isEmpty || _data.name.isEmpty) {
-      emit(LoginStateMessage('All fields must not be empty'));
-      emit(LoginStateBase(_data));
-      return;
-    }
-
     try {
       emit(LoginStateLoading());
       await FirebaseAuth.instance.createUserWithEmailAndPassword(

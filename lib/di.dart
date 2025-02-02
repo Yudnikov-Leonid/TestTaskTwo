@@ -12,12 +12,13 @@ class DI {
       Lock: Lock(),
     });
 
-    _container.addAll({
-      FirestoreService: FirestoreServiceImpl(_container[Lock])
-    });
+    _container
+        .addAll({FirestoreService: FirestoreServiceImpl(_container[Lock])});
 
     _container.addAll({
-      LoginBloc: LoginBloc(firestoreService: _container[FirestoreService])
+      LoginBloc: LoginBloc(
+        firestoreService: _container[FirestoreService],
+      )
     });
   }
 
