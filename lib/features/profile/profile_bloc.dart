@@ -9,9 +9,8 @@ import 'package:profile_app/core/data/user_entity.dart';
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   late final StreamSubscription _sub;
 
-  ProfileBloc(
-      {required StorageService storageService,
-      required FirestoreService firestoreService})
+  ProfileBloc({required StorageService storageService,
+    required FirestoreService firestoreService})
       : _storageService = storageService,
         _firestoreService = firestoreService,
         super(ProfileStateLoading()) {
@@ -37,15 +36,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final FirestoreService _firestoreService;
   late UserEntity _user;
 
-  void onSaveName(
-      ProfileEventSaveName event, Emitter<ProfileState> emit) async {
+  void onSaveName(ProfileEventSaveName event,
+      Emitter<ProfileState> emit) async {
     emit(ProfileStateLoading());
     _firestoreService.setName(event.name);
     emit(ProfileStateBase(_user));
   }
 
-  void onSaveDescription(
-      ProfileEventSaveDescription event, Emitter<ProfileState> emit) async {
+  void onSaveDescription(ProfileEventSaveDescription event,
+      Emitter<ProfileState> emit) async {
     emit(ProfileStateLoading());
     _firestoreService.setDescription(event.description);
     emit(ProfileStateBase(_user));
@@ -57,12 +56,15 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   void onInitial(ProfileEventInitial event, Emitter<ProfileState> emit) async {
     emit(ProfileStateLoading());
-    _user = await _firestoreService.getUser();
-    emit(ProfileStateBase(_user));
+    final stream = StreamIterator(_firestoreService.getUserYield());
+    while (await stream.moveNext()) {
+      _user = stream.current;
+      emit(ProfileStateBase(_user));
+    }
   }
 
-  void onLoadImage(
-      ProfileEventLoadImage event, Emitter<ProfileState> emit) async {
+  void onLoadImage(ProfileEventLoadImage event,
+      Emitter<ProfileState> emit) async {
     try {
       XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
       if (image == null) return;
@@ -109,6 +111,7 @@ class ProfileStateLoading extends ProfileState {}
 
 class ProfileStateMessage extends ProfileState {
   final String message;
+
   ProfileStateMessage(this.message);
 }
 

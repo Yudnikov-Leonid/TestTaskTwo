@@ -6,7 +6,7 @@ import 'package:synchronized/synchronized.dart';
 abstract class FirestoreService {
   Future createUser(UserCreateData data);
 
-  Future<UserEntity> getUser();
+  Stream<UserEntity> getUserYield();
 
   Stream<UserEntity> userStream();
 
@@ -16,7 +16,8 @@ abstract class FirestoreService {
 
   Future setImageUrl(String url);
 
-  Future<List<UserEntity>> getUsersList({bool fromCache = false});
+  Stream<List<UserEntity>> getUsersListYield();
+  List<UserEntity> getUsersList();
 }
 
 class FirestoreServiceImpl implements FirestoreService {
@@ -45,17 +46,23 @@ class FirestoreServiceImpl implements FirestoreService {
     return userRef.snapshots().map((e) => UserEntity.fromJson(e.data()!));
   }
 
+  UserEntity? _userCache;
+
   @override
-  Future<UserEntity> getUser() => _lock.synchronized(() async {
-        final data = await _firestore
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .get();
-        if (data.data() == null) {
-          return UserEntity.empty();
-        }
-        return UserEntity.fromJson(data.data()!);
-      });
+  Stream<UserEntity> getUserYield() async* {
+    if (_userCache != null) {
+      yield _userCache!;
+    }
+    final data = await _firestore
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    if (data.data() == null && _userCache == null) {
+      yield UserEntity.empty();
+    } else {
+      yield UserEntity.fromJson(data.data()!);
+    }
+  }
 
   @override
   Future setDescription(String description) => _lock.synchronized(() async {
@@ -82,15 +89,19 @@ class FirestoreServiceImpl implements FirestoreService {
       });
 
   List<UserEntity> _usersCache = [];
+
   @override
-  Future<List<UserEntity>> getUsersList({bool fromCache = false}) async {
-    if (fromCache) {
-      return _usersCache;
+  Stream<List<UserEntity>> getUsersListYield() async* {
+    if (_usersCache.isNotEmpty) {
+      yield _usersCache;
     }
     final data = await _firestore.collection('users').get();
     _usersCache = data.docs.map((e) => UserEntity.fromJson(e.data())).toList();
-    return _usersCache;
+    yield _usersCache;
   }
+
+  @override
+  List<UserEntity> getUsersList() => _usersCache;
 }
 
 class UserCreateData {
