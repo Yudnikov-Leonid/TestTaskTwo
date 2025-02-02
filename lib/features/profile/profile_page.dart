@@ -1,13 +1,12 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
-import 'package:profile_app/core/data/user_entity.dart';
-import 'package:profile_app/core/presentation/provide_user.dart';
+import 'package:profile_app/core/data/storage_service.dart';
 import 'package:profile_app/di.dart';
 import 'package:profile_app/features/login/presentation/login_bloc.dart';
 import 'package:profile_app/features/profile/edit_field_dialog.dart';
+import 'package:profile_app/features/profile/profile_bloc.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -17,27 +16,43 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late UserEntity _user;
-  late StreamSubscription _sub;
-  final _firestoreSevicer = di.get<FirestoreService>();
+  late final ProfileBloc _bloc;
 
   @override
   void initState() {
-    final state = context.findAncestorStateOfType<ProvideUserState>()!;
-    _user = state.user;
-    _sub = state.userStream.listen((newUser) {
-      setState(() {
-        _user = newUser;
-      });
-    });
+    _bloc = ProfileBloc(
+        storageService: di.get<StorageService>(),
+        firestoreService: di.get<FirestoreService>())..add(ProfileEventInitial());
     super.initState();
   }
 
   @override
   void dispose() {
-    _sub.cancel();
+    _bloc.close();
     super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+        create: (context) => _bloc,
+        child:
+            BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
+          if (state is ProfileStateLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ProfileStateBase) {
+            return _Body(state, _bloc);
+          }
+          return const SizedBox();
+        }));
+  }
+}
+
+class _Body extends StatelessWidget {
+  const _Body(this._state, this._bloc);
+
+  final ProfileStateBase _state;
+  final ProfileBloc _bloc;
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +62,21 @@ class _ProfilePageState extends State<ProfilePage> {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 100,
-              width: 100,
-              decoration: const BoxDecoration(
-                  color: Colors.grey, shape: BoxShape.circle),
+            InkWell(
+              onTap: () async {
+                XFile? image =
+                    await ImagePicker().pickImage(source: ImageSource.gallery);
+                if (image != null) {
+                  StorageServiceImpl().loadImage(image);
+                }
+              },
+              child: Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade300, shape: BoxShape.circle),
+                child: const Icon(Icons.person, size: 60, color: Colors.grey),
+              ),
             ),
             const SizedBox(width: 10),
             Column(
@@ -65,12 +90,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         context: context,
                         builder: (context) => EditFieldDialog(
                             title: 'Edit name',
-                            text: _user.name,
-                            onSave: (value) async {
-                              await _firestoreSevicer.setName(value);
+                            text: _state.user.name,
+                            onSave: (value) {
+                              _bloc.add(ProfileEventSaveName(value));
                             }));
                   },
-                  child: Text(_user.name,
+                  child: Text(_state.user.name,
                       style: const TextStyle(
                           fontSize: 20, fontWeight: FontWeight.bold)),
                 ),
@@ -82,18 +107,20 @@ class _ProfilePageState extends State<ProfilePage> {
                         context: context,
                         builder: (context) => EditFieldDialog(
                             title: 'Edit description',
-                            text: _user.description,
+                            text: _state.user.description,
                             multiline: true,
-                            onSave: (value) async {
-                              await _firestoreSevicer.setDescription(value);
+                            onSave: (value) {
+                              _bloc.add(ProfileEventSaveDescription(value));
                             }));
                   },
                   child: SizedBox(
                       width: MediaQuery.sizeOf(context).width * 0.6,
                       child: Text(
-                          _user.description.isEmpty ? 'No description' : _user.description,
-                          style:
-                              const TextStyle(fontSize: 14, color: Colors.grey))),
+                          _state.user.description.isEmpty
+                              ? 'No description'
+                              : _state.user.description,
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.grey))),
                 ),
               ],
             )

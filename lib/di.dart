@@ -1,4 +1,5 @@
 import 'package:profile_app/core/data/firestore_service.dart';
+import 'package:profile_app/core/data/storage_service.dart';
 import 'package:profile_app/features/login/presentation/login_bloc.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -12,8 +13,10 @@ class DI {
       Lock: Lock(),
     });
 
-    _container
-        .addAll({FirestoreService: FirestoreServiceImpl(_container[Lock])});
+    _container.addAll({
+      FirestoreService: FirestoreServiceImpl(_container[Lock]),
+      StorageService: StorageServiceImpl(),
+    });
 
     _container.addAll({
       LoginBloc: LoginBloc(

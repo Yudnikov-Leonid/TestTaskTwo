@@ -8,7 +8,7 @@ abstract class FirestoreService {
 
   Future<UserEntity> getUser();
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>> userStream();
+  Stream<UserEntity> userStream();
 
   Future setName(String name);
 
@@ -34,11 +34,11 @@ class FirestoreServiceImpl implements FirestoreService {
   }
 
   @override
-  Stream<DocumentSnapshot<Map<String, dynamic>>> userStream() {
+  Stream<UserEntity> userStream() {
     final userRef = _firestore
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid);
-    return userRef.snapshots();
+    return userRef.snapshots().map((e) => UserEntity.fromJson(e.data()!));
   }
 
   @override

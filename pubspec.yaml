@@ -17,6 +17,8 @@ dependencies:
   google_sign_in: ^6.2.2
   provider: ^6.1.2
   synchronized: ^3.3.0+3
+  image_picker: ^1.1.2
+  cloudinary: ^1.2.0
 
 dev_dependencies:
   flutter_test:

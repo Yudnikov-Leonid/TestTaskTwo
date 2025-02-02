@@ -25,8 +25,8 @@ class ProvideUserState extends State<ProvideUser> {
   void initState() {
     userStream = _streamController.stream;
     _sub = _firestoreService.userStream().listen((newUser) {
-      user = UserEntity.fromJson(newUser.data()!);
-      _streamController.add(user);
+      //user = UserEntity.fromJson(newUser.data()!);
+      //_streamController.add(user);
     });
     super.initState();
   }
