@@ -5,8 +5,14 @@ import 'package:synchronized/synchronized.dart';
 
 abstract class FirestoreService {
   Future createUser(UserCreateData data);
+
   Future<UserEntity> getUser();
+
   Stream<DocumentSnapshot<Map<String, dynamic>>> userStream();
+
+  Future setName(String name);
+
+  Future setDescription(String description);
 }
 
 class FirestoreServiceImpl implements FirestoreService {
@@ -29,24 +35,44 @@ class FirestoreServiceImpl implements FirestoreService {
 
   @override
   Stream<DocumentSnapshot<Map<String, dynamic>>> userStream() {
-    final userRef = _firestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid);
+    final userRef = _firestore
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
     return userRef.snapshots();
   }
 
   @override
-  Future<UserEntity> getUser() async {
-    final data = await _firestore.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).get();
-    if (data.data() == null) {
-      return UserEntity.empty();
-    }
-    return UserEntity.fromJson(data.data()!);
-  }
+  Future<UserEntity> getUser() => _lock.synchronized(() async {
+        final data = await _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .get();
+        if (data.data() == null) {
+          return UserEntity.empty();
+        }
+        return UserEntity.fromJson(data.data()!);
+      });
+
+  @override
+  Future setDescription(String description) => _lock.synchronized(() async {
+        final userRef = _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid);
+        await userRef.update({'description': description});
+      });
+
+  @override
+  Future setName(String name) => _lock.synchronized(() async {
+        final userRef = _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid);
+        await userRef.update({'name': name});
+      });
 }
 
 class UserCreateData {
   final String name;
   final String email;
 
-  UserCreateData(
-      {required this.name, required this.email});
+  UserCreateData({required this.name, required this.email});
 }

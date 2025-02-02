@@ -39,6 +39,7 @@ class ProvideUserState extends State<ProvideUser> {
 
   Future _loadUser() async {
     user = await _firestoreService.getUser();
+    return true;
   }
 
   @override
@@ -46,6 +47,9 @@ class ProvideUserState extends State<ProvideUser> {
     return FutureBuilder(
         future: _loadUser(),
         builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
           return widget.child;
         }
     );
