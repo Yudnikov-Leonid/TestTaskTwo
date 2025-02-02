@@ -34,65 +34,106 @@ class SearchPage extends StatelessWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+class _Body extends StatefulWidget {
   const _Body(this._data);
 
   final SearchStateBase _data;
 
   @override
+  State<_Body> createState() => _BodyState();
+}
+
+class _BodyState extends State<_Body> {
+  final _controller = TextEditingController();
+
+  @override
+  void initState() {
+    if (widget._data.updateControllers) {
+      _controller.text = widget._data.data.searchText;
+    }
+    super.initState();
+  }
+
+  final _focusNode = FocusNode();
+
+  @override
   Widget build(BuildContext context) {
-    final users = _data.data.users;
+    final users = widget._data.data.users;
     return Scaffold(
       appBar: AppBar(
-        title: TextField(decoration: InputDecoration(hintText: 'Search')),
+        title: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            maxLength: 20,
+            onChanged: (s) {
+              context
+                  .read<SearchBloc>()
+                  .add(SearchEventInput(_controller.text));
+            },
+            decoration: InputDecoration(
+                hintText: 'Search',
+                counterText: '',
+                suffixIcon: _controller.text.isEmpty
+                    ? null
+                    : IconButton(
+                        onPressed: () {
+                          _controller.clear();
+                          context.read<SearchBloc>().add(SearchEventInput(''));
+                          _focusNode.unfocus();
+                        },
+                        icon: const Icon(Icons.clear)))),
       ),
-      body: ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, i) {
-            final user = users[i];
-            return ListTile(
-                title: InkWell(
-              onTap: () {
-                showDialog(context: context, builder: (context) => UserInfoDialog(user));
-              },
-              child: Row(children: [
-                user.iconPath == null
-                    ? Container(
-                        height: 60,
-                        width: 60,
-                        decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
-                            shape: BoxShape.circle),
-                        child: const Icon(Icons.person,
-                            size: 40, color: Colors.grey),
-                      )
-                    : CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(user.iconPath!),
-                      ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(user.name,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
-                    SizedBox(
-                      width: MediaQuery.sizeOf(context).width * 0.6,
-                      child: Text(
-                          user.description.isEmpty
-                              ? 'No description'
-                              : user.description,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style:
-                              const TextStyle(fontSize: 14, color: Colors.grey)),
-                    ),
-                  ],
-                )
-              ]),
-            ));
-          }),
+      body: users.isEmpty
+          ? const Center(child: Text('Nothing found'))
+          : ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (context, i) {
+                final user = users[i];
+                return ListTile(
+                    title: InkWell(
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => UserInfoDialog(user));
+                  },
+                  child: Row(children: [
+                    user.iconPath == null
+                        ? Container(
+                            height: 60,
+                            width: 60,
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                shape: BoxShape.circle),
+                            child: const Icon(Icons.person,
+                                size: 40, color: Colors.grey),
+                          )
+                        : CircleAvatar(
+                            radius: 30,
+                            backgroundImage: NetworkImage(user.iconPath!),
+                          ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(user.name,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          width: MediaQuery.sizeOf(context).width * 0.6,
+                          child: Text(
+                              user.description.isEmpty
+                                  ? 'No description'
+                                  : user.description,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 14, color: Colors.grey)),
+                        ),
+                      ],
+                    )
+                  ]),
+                ));
+              }),
     );
   }
 }

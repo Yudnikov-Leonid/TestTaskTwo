@@ -16,7 +16,7 @@ abstract class FirestoreService {
 
   Future setImageUrl(String url);
 
-  Future<List<UserEntity>> getUsersList();
+  Future<List<UserEntity>> getUsersList({bool fromCache = false});
 }
 
 class FirestoreServiceImpl implements FirestoreService {
@@ -81,10 +81,15 @@ class FirestoreServiceImpl implements FirestoreService {
         await userRef.update({'icon_path': url});
       });
 
+  List<UserEntity> _usersCache = [];
   @override
-  Future<List<UserEntity>> getUsersList() async {
+  Future<List<UserEntity>> getUsersList({bool fromCache = false}) async {
+    if (fromCache) {
+      return _usersCache;
+    }
     final data = await _firestore.collection('users').get();
-    return data.docs.map((e) => UserEntity.fromJson(e.data())).toList();
+    _usersCache = data.docs.map((e) => UserEntity.fromJson(e.data())).toList();
+    return _usersCache;
   }
 }
 

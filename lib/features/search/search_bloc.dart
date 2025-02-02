@@ -7,10 +7,19 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       : _firestoreService = firestoreService,
         super(SearchStateLoading()) {
     on<SearchEventInitial>(_onInitial);
+    on<SearchEventInput>(onInput);
   }
 
   final FirestoreService _firestoreService;
   SearchData _data = SearchData(searchText: '', users: []);
+
+  void onInput(SearchEventInput event, Emitter<SearchState> emit) async {
+    final users = await _firestoreService.getUsersList(fromCache: true);
+    _data = _data.copyWith(
+        users: users.where((e) => e.name.toLowerCase().startsWith(event.input.toLowerCase())).toList(),
+        searchText: event.input);
+    emit(SearchStateBase(_data));
+  }
 
   void _onInitial(SearchEventInitial event, Emitter<SearchState> emit) async {
     emit(SearchStateLoading());
@@ -28,12 +37,19 @@ abstract class SearchEvent {}
 
 class SearchEventInitial extends SearchEvent {}
 
+class SearchEventInput extends SearchEvent {
+  final String input;
+
+  SearchEventInput(this.input);
+}
+
 abstract class SearchState {}
 
 class SearchStateLoading extends SearchState {}
 
 class SearchStateFailure extends SearchState {
   final String message;
+
   SearchStateFailure(this.message);
 }
 
