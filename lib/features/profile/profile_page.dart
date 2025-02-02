@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
 import 'package:profile_app/core/data/storage_service.dart';
 import 'package:profile_app/di.dart';
@@ -22,7 +21,8 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     _bloc = ProfileBloc(
         storageService: di.get<StorageService>(),
-        firestoreService: di.get<FirestoreService>())..add(ProfileEventInitial());
+        firestoreService: di.get<FirestoreService>())
+      ..add(ProfileEventInitial());
     super.initState();
   }
 
@@ -36,15 +36,22 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return BlocProvider(
         create: (context) => _bloc,
-        child:
-            BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
-          if (state is ProfileStateLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is ProfileStateBase) {
-            return _Body(state, _bloc);
-          }
-          return const SizedBox();
-        }));
+        child: BlocConsumer<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if (state is ProfileStateMessage) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(state.message)));
+            }
+          },
+          builder: (context, state) {
+            if (state is ProfileStateLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is ProfileStateBase) {
+              return _Body(state, _bloc);
+            }
+            return const SizedBox();
+          },
+        ));
   }
 }
 
@@ -63,20 +70,24 @@ class _Body extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             InkWell(
+              highlightColor: Colors.transparent,
+              splashColor: Colors.transparent,
               onTap: () async {
-                XFile? image =
-                    await ImagePicker().pickImage(source: ImageSource.gallery);
-                if (image != null) {
-                  StorageServiceImpl().loadImage(image);
-                }
+                _bloc.add(ProfileEventLoadImage());
               },
-              child: Container(
-                height: 100,
-                width: 100,
-                decoration: BoxDecoration(
-                    color: Colors.grey.shade300, shape: BoxShape.circle),
-                child: const Icon(Icons.person, size: 60, color: Colors.grey),
-              ),
+              child: _state.user.iconPath == null
+                  ? Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                          color: Colors.grey.shade300, shape: BoxShape.circle),
+                      child: const Icon(Icons.person,
+                          size: 60, color: Colors.grey),
+                    )
+                  : CircleAvatar(
+                      radius: 50,
+                      backgroundImage: NetworkImage(_state.user.iconPath!),
+                    ),
             ),
             const SizedBox(width: 10),
             Column(

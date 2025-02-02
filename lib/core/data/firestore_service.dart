@@ -13,6 +13,8 @@ abstract class FirestoreService {
   Future setName(String name);
 
   Future setDescription(String description);
+
+  Future setImageUrl(String url);
 }
 
 class FirestoreServiceImpl implements FirestoreService {
@@ -68,6 +70,14 @@ class FirestoreServiceImpl implements FirestoreService {
             .doc(FirebaseAuth.instance.currentUser!.uid);
         await userRef.update({'name': name});
       });
+
+  @override
+  Future setImageUrl(String url) => _lock.synchronized(() async {
+    final userRef = _firestore
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid);
+    await userRef.update({'icon_path': url});
+  });
 }
 
 class UserCreateData {
