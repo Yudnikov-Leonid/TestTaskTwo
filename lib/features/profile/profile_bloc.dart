@@ -73,7 +73,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         await _firestoreService.setImageUrl(result.$1!);
         emit(ProfileStateBase(_user));
       } else {
-        emit(ProfileStateMessage(result.$1 ?? 'Error happened'));
+        emit(ProfileStateMessage(result.$1 ?? 'Error is happened'));
         emit(ProfileStateBase(_user));
       }
     } catch (e) {

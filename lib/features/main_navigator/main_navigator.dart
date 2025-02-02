@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:profile_app/core/presentation/provide_user.dart';
 import 'package:profile_app/features/login/presentation/login_page.dart';
 import 'package:profile_app/features/profile/profile_page.dart';
+import 'package:profile_app/features/search/search_page.dart';
 
 class MainNavigator extends StatefulWidget {
   const MainNavigator({super.key});
@@ -18,7 +18,7 @@ class _MainNavigatorState extends State<MainNavigator> {
         stream: FirebaseAuth.instance.userChanges(),
         builder: (context, snapshot) {
           if (snapshot.data?.emailVerified ?? false) {
-            return const ProvideUser(child: _BottomNavigator());
+            return const _BottomNavigator();
           } else {
             return const LoginPage();
           }
@@ -34,8 +34,8 @@ class _BottomNavigator extends StatefulWidget {
 }
 
 class _BottomNavigatorState extends State<_BottomNavigator> {
-  int _index = 1;
-  final _pages = [Container(color: Colors.red), const ProfilePage()];
+  int _index = 0;
+  final _pages = [const SearchPage(), const ProfilePage()];
 
   @override
   Widget build(BuildContext context) {
