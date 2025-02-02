@@ -1,4 +1,4 @@
-import 'package:profile_app/core/firestore_service.dart';
+import 'package:profile_app/core/data/firestore_service.dart';
 import 'package:profile_app/features/login/presentation/login_bloc.dart';
 import 'package:synchronized/synchronized.dart';
 

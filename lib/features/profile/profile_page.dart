@@ -1,9 +1,39 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:profile_app/core/data/user_entity.dart';
+import 'package:profile_app/core/presentation/provide_user.dart';
 import 'package:profile_app/features/login/presentation/login_bloc.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  late UserEntity _user;
+  late StreamSubscription _sub;
+
+  @override
+  void initState() {
+    final state = context.findAncestorStateOfType<ProvideUserState>()!;
+    _user = state.user;
+    _sub = state.userStream.listen((newUser) {
+      setState(() {
+        _user = newUser;
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +53,14 @@ class ProfilePage extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Name',
+                Text(_user.name,
                     style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 SizedBox(
                     width: MediaQuery.sizeOf(context).width * 0.6,
                     child: Text(
-                        'DescDescDescDescDescDescDescDescDescDescDescDescDescDescDescDesc Desc Desc DescDesc',
-                        style: TextStyle(fontSize: 14, color: Colors.grey))),
+                        _user.desc.isEmpty ? 'No description' : _user.desc,
+                        style: const TextStyle(fontSize: 14, color: Colors.grey))),
               ],
             )
           ],

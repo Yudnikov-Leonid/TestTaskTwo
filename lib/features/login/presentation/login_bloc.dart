@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:profile_app/core/firestore_service.dart';
+import 'package:profile_app/core/data/firestore_service.dart';
 import 'package:profile_app/features/login/data/login_data.dart';
 import 'package:profile_app/features/login/data/login_ui_type.dart';
 import 'package:firebase_auth/firebase_auth.dart';

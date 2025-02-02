@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:profile_app/core/presentation/provide_user.dart';
 import 'package:profile_app/features/login/presentation/login_page.dart';
 import 'package:profile_app/features/profile/profile_page.dart';
 
@@ -17,7 +18,7 @@ class _MainNavigatorState extends State<MainNavigator> {
         stream: FirebaseAuth.instance.userChanges(),
         builder: (context, snapshot) {
           if (snapshot.data?.emailVerified ?? false) {
-            return const _BottomNavigator();
+            return const ProvideUser(child: _BottomNavigator());
           } else {
             return const LoginPage();
           }
