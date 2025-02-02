@@ -17,10 +17,47 @@ class _MainNavigatorState extends State<MainNavigator> {
         stream: FirebaseAuth.instance.userChanges(),
         builder: (context, snapshot) {
           if (snapshot.data?.emailVerified ?? false) {
-            return const ProfilePage();
+            return const _BottomNavigator();
           } else {
             return const LoginPage();
           }
         });
+  }
+}
+
+class _BottomNavigator extends StatefulWidget {
+  const _BottomNavigator();
+
+  @override
+  State<_BottomNavigator> createState() => _BottomNavigatorState();
+}
+
+class _BottomNavigatorState extends State<_BottomNavigator> {
+  int _index = 1;
+  final _pages = [Container(color: Colors.red), const ProfilePage()];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: (newIndex) {
+          setState(() {
+            _index = newIndex;
+          });
+        },
+        currentIndex: _index,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          )
+        ],
+      ),
+      body: _pages[_index],
+    );
   }
 }
