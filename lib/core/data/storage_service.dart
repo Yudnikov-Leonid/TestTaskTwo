@@ -1,6 +1,8 @@
 import 'package:cloudinary/cloudinary.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'keys.dart';
+
 abstract class StorageService {
   Future<(String?, bool)> loadImage(XFile file);
 }
@@ -11,13 +13,13 @@ class StorageServiceImpl implements StorageService {
   Future<(String?, bool)> loadImage(XFile file) async {
     try {
       final cloudinary = Cloudinary.signedConfig(
-        apiKey: '858661424547151',
-        apiSecret: 'QH39cNlOLl2pHvLbdoA-cWq7z1w',
-        cloudName: 'djayfmcan',
+        apiKey: Keys.cloudStorageApiKey,
+        apiSecret: Keys.cloudStorageApiSecret,
+        cloudName: Keys.cloudStorageName,
       );
 
       final response = await cloudinary.unsignedUpload(
-          uploadPreset: 'userimage',
+          uploadPreset: Keys.cloudStorageUploadPreset,
           file: file.path,
           resourceType: CloudinaryResourceType.image,
           fileName: file.name.split('.').first,
