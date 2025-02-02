@@ -104,6 +104,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(LoginStateBase(_data));
       return;
     }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: _data.email);
+      emit(LoginStateDialog('Link is sent', 'Check your email'));
+      _data = _data.copyWith(uiType: LoginUiAuth());
+    } on FirebaseAuthException catch (e) {
+      emit(LoginStateMessage(e.message ?? ''));
+    } catch (e) {
+      emit(LoginStateMessage(e.toString()));
+    }
+    emit(LoginStateBase(_data));
   }
 
   void onLoginEventLogout(
