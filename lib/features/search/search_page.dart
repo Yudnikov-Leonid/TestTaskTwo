@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:profile_app/di.dart';
 import 'package:profile_app/features/search/search_bloc.dart';
+import 'package:profile_app/features/search/user_info_dialog.dart';
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
@@ -51,7 +52,9 @@ class _Body extends StatelessWidget {
             final user = users[i];
             return ListTile(
                 title: InkWell(
-              onTap: () {},
+              onTap: () {
+                showDialog(context: context, builder: (context) => UserInfoDialog(user));
+              },
               child: Row(children: [
                 user.iconPath == null
                     ? Container(
