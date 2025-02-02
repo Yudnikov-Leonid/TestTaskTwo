@@ -51,14 +51,15 @@ class _Body extends StatelessWidget {
             final user = users[i];
             return ListTile(
                 title: InkWell(
-                  onTap: () {},
-                  child: Row(children: [
-                                user.iconPath == null
+              onTap: () {},
+              child: Row(children: [
+                user.iconPath == null
                     ? Container(
                         height: 60,
                         width: 60,
                         decoration: BoxDecoration(
-                            color: Colors.grey.shade300, shape: BoxShape.circle),
+                            color: Colors.grey.shade300,
+                            shape: BoxShape.circle),
                         child: const Icon(Icons.person,
                             size: 40, color: Colors.grey),
                       )
@@ -66,19 +67,28 @@ class _Body extends StatelessWidget {
                         radius: 30,
                         backgroundImage: NetworkImage(user.iconPath!),
                       ),
-                                const SizedBox(width: 10),
-                                Column(
+                const SizedBox(width: 10),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(user.name,
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(user.description.isEmpty ? 'No description' : user.description,
-                        style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width * 0.6,
+                      child: Text(
+                          user.description.isEmpty
+                              ? 'No description'
+                              : user.description,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style:
+                              const TextStyle(fontSize: 14, color: Colors.grey)),
+                    ),
                   ],
-                                )
-                              ]),
-                ));
+                )
+              ]),
+            ));
           }),
     );
   }

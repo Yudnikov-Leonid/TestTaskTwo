@@ -75,20 +75,16 @@ class FirestoreServiceImpl implements FirestoreService {
 
   @override
   Future setImageUrl(String url) => _lock.synchronized(() async {
-    final userRef = _firestore
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid);
-    await userRef.update({'icon_path': url});
-  });
+        final userRef = _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid);
+        await userRef.update({'icon_path': url});
+      });
 
-  List<UserEntity> _usersCache = [];
   @override
   Future<List<UserEntity>> getUsersList() async {
-    if (_usersCache.isEmpty) {
-      final data = await _firestore.collection('users').get();
-      _usersCache = data.docs.map((e) => UserEntity.fromJson(e.data())).toList();
-    }
-    return _usersCache;
+    final data = await _firestore.collection('users').get();
+    return data.docs.map((e) => UserEntity.fromJson(e.data())).toList();
   }
 }
 
