@@ -8,28 +8,33 @@ import 'package:profile_app/core/data/user_entity.dart';
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   SearchBloc({required FirestoreService firestoreService})
       : _firestoreService = firestoreService,
-        super(SearchStateLoading()) {
+        super(const SearchStateLoading()) {
     on<SearchEventInitial>(_onInitial);
     on<SearchEventInput>(onInput);
   }
 
   final FirestoreService _firestoreService;
-  SearchData _data = SearchData(searchText: '', users: []);
+  SearchData _data = const SearchData(searchText: '', users: []);
 
   void onInput(SearchEventInput event, Emitter<SearchState> emit) async {
     final users = _firestoreService.getUsersList();
-    _data = _data.copyWith(
-        users: users.where((e) => e.name.toLowerCase().startsWith(event.input.toLowerCase())).toList(),
-        searchText: event.input);
+    try {
+      _data = _data.copyWith(
+          users: users.where((e) => e.name.toLowerCase().startsWith(event.input.toLowerCase())).toList(),
+          searchText: event.input);
+
+    } catch (e) {
+      emit(SearchStateMessage(e.toString()));
+    }
     emit(SearchStateBase(_data));
   }
 
   void _onInitial(SearchEventInitial event, Emitter<SearchState> emit) async {
-    emit(SearchStateLoading());
+    emit(const SearchStateLoading());
     try {
-      final streamIter = StreamIterator(_firestoreService.getUsersListYield());
-      while (await streamIter.moveNext()) {
-        _data = _data.copyWith(users: streamIter.current);
+      final iter = StreamIterator(_firestoreService.getUsersListYield());
+      while (await iter.moveNext()) {
+        _data = _data.copyWith(users: iter.current);
         emit(SearchStateBase(_data));
       }
     } catch (e) {

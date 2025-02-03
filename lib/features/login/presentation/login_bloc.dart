@@ -10,7 +10,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     required FirestoreService firestoreService,
   })  : _firestoreService = firestoreService,
-        super(LoginStateLoading()) {
+        super(const LoginStateLoading()) {
     on<LoginEventInitial>(onLoginEventInitial);
     on<LoginEventChangeUiType>(onLoginEventChangeUiType);
 
@@ -36,7 +36,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   void onLoginEventRegister(
       LoginEventRegister event, Emitter<LoginState> emit) async {
     try {
-      emit(LoginStateLoading());
+      emit(const LoginStateLoading());
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _data.email, password: _data.password);
       await FirebaseAuth.instance.currentUser?.sendEmailVerification();
@@ -44,14 +44,16 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
           .createUser(UserCreateData(name: _data.name, email: _data.email));
       await FirebaseAuth.instance.signOut();
 
-      emit(LoginStateDialog('Link to verify is sent', 'Check your email'));
+      emit(
+          const LoginStateDialog('Link to verify is sent', 'Check your email'));
       _data = _data.copyWith(uiType: LoginUiAuth(), email: '', name: '');
     } on FirebaseAuthException catch (e, st) {
       print('e: ${e.message}, st: $st');
       if (e.code == 'weak-password') {
-        emit(LoginStateMessage('The password provided is too weak.'));
+        emit(const LoginStateMessage('The password provided is too weak.'));
       } else if (e.code == 'email-already-in-use') {
-        emit(LoginStateMessage('The account already exists for that email.'));
+        emit(const LoginStateMessage(
+            'The account already exists for that email.'));
       } else {
         emit(LoginStateMessage(e.message ?? ''));
       }
@@ -64,13 +66,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void onLoginEventAuth(LoginEventAuth event, Emitter<LoginState> emit) async {
     if (_data.email.isEmpty || _data.password.isEmpty) {
-      emit(LoginStateMessage('All fields must not be empty'));
+      emit(const LoginStateMessage('All fields must not be empty'));
       emit(LoginStateBase(_data));
       return;
     }
 
     try {
-      emit(LoginStateLoading());
+      emit(const LoginStateLoading());
       final cred = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: _data.email, password: _data.password);
       if (cred.user?.emailVerified ?? false) {
@@ -82,7 +84,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             restore: '');
       } else {
         await FirebaseAuth.instance.signOut();
-        emit(LoginStateMessage('Verify your email'));
+        emit(const LoginStateMessage('Verify your email'));
       }
     } on FirebaseAuthException catch (e) {
       emit(LoginStateMessage(e.message ?? ''));
@@ -96,14 +98,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   void onLoginEventRestore(
       LoginEventRestore event, Emitter<LoginState> emit) async {
     if (_data.email.isEmpty) {
-      emit(LoginStateMessage('All fields must not be empty'));
+      emit(const LoginStateMessage('All fields must not be empty'));
       emit(LoginStateBase(_data));
       return;
     }
 
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: _data.email);
-      emit(LoginStateDialog('Link is sent', 'Check your email'));
+      emit(const LoginStateDialog('Link is sent', 'Check your email'));
       _data = _data.copyWith(uiType: LoginUiAuth());
     } on FirebaseAuthException catch (e) {
       emit(LoginStateMessage(e.message ?? ''));
@@ -115,8 +117,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   void onLoginEventLogout(
       LoginEventLogout event, Emitter<LoginState> emit) async {
-    FirebaseAuth.instance.signOut();
-    GoogleSignIn().signOut();
+    try {
+      FirebaseAuth.instance.signOut();
+      GoogleSignIn().signOut();
+    } catch (e) {
+      print('logout error: $e');
+    }
   }
 
   void onLoginEventInitial(
@@ -219,6 +225,7 @@ class LoginStateDialog extends LoginState {
 
 class LoginStateBase extends LoginState {
   final LoginData loginData;
+
   /// обновлять поля ввода на значение из loginData
   /// по умолчанию false, чтобы не сеттить текст при каждой введённой букве, так как это портит опыт юзера
   final bool updateControllers;
