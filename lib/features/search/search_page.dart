@@ -2,6 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:profile_app/core/data/firestore_service.dart';
 import 'package:profile_app/di.dart';
 import 'package:profile_app/features/search/search_bloc.dart';
 import 'package:profile_app/features/search/user_info_dialog.dart';
@@ -13,7 +14,7 @@ class SearchPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          SearchBloc(firestoreService: di.get())..add(SearchEventInitial()),
+          SearchBloc(firestoreService: di.get<FirestoreService>())..add(SearchEventInitial()),
       child: BlocConsumer<SearchBloc, SearchState>(
         listener: (context, state) {
           if (state is SearchStateMessage) {
