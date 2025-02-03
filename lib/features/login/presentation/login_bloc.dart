@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
@@ -186,29 +187,44 @@ class LoginEventInputName extends LoginEvent {
 }
 
 /// STATES
-abstract class LoginState {}
+abstract class LoginState extends Equatable {
+  const LoginState();
+}
 
-class LoginStateLoading extends LoginState {}
+class LoginStateLoading extends LoginState {
+  const LoginStateLoading();
+
+  @override
+  List<Object?> get props => [];
+}
 
 class LoginStateMessage extends LoginState {
   final String message;
 
-  LoginStateMessage(this.message);
+  const LoginStateMessage(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class LoginStateDialog extends LoginState {
   final String title;
   final String message;
 
-  LoginStateDialog(this.title, this.message);
+  const LoginStateDialog(this.title, this.message);
+
+  @override
+  List<Object?> get props => [title, message];
 }
 
 class LoginStateBase extends LoginState {
   final LoginData loginData;
-
   /// обновлять поля ввода на значение из loginData
   /// по умолчанию false, чтобы не сеттить текст при каждой введённой букве, так как это портит опыт юзера
   final bool updateControllers;
 
-  LoginStateBase(this.loginData, {this.updateControllers = false});
+  const LoginStateBase(this.loginData, {this.updateControllers = false});
+
+  @override
+  List<Object?> get props => [loginData, updateControllers];
 }

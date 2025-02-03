@@ -1,17 +1,19 @@
-class UserEntity {
+import 'package:equatable/equatable.dart';
+
+class UserEntity extends Equatable {
   final String name;
   final String description;
   final String email;
   final String? iconPath;
 
-  UserEntity(
+  const UserEntity(
       {required this.name,
       required this.description,
       required this.email,
       required this.iconPath});
 
   static UserEntity empty() {
-    return UserEntity(name: '', description: '', email: '', iconPath: null);
+    return const UserEntity(name: '', description: '', email: '', iconPath: null);
   }
 
   factory UserEntity.fromJson(Map<String, dynamic> json) {
@@ -22,4 +24,7 @@ class UserEntity {
       iconPath: json['icon_path'],
     );
   }
+
+  @override
+  List<Object?> get props => [name, description, email, iconPath];
 }

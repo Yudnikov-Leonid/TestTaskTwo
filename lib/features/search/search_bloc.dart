@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
 import 'package:profile_app/core/data/user_entity.dart';
@@ -48,37 +49,56 @@ class SearchEventInput extends SearchEvent {
   SearchEventInput(this.input);
 }
 
-abstract class SearchState {}
+abstract class SearchState extends Equatable {
+  const SearchState();
+}
 
-class SearchStateLoading extends SearchState {}
+class SearchStateLoading extends SearchState {
+  const SearchStateLoading();
+
+  @override
+  List<Object?> get props => [];
+}
 
 class SearchStateFailure extends SearchState {
   final String message;
 
-  SearchStateFailure(this.message);
+  const SearchStateFailure(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class SearchStateMessage extends SearchState {
   final String message;
 
-  SearchStateMessage(this.message);
+  const SearchStateMessage(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class SearchStateBase extends SearchState {
   final SearchData data;
   final bool updateControllers;
 
-  SearchStateBase(this.data, {this.updateControllers = false});
+  const SearchStateBase(this.data, {this.updateControllers = false});
+
+  @override
+  List<Object?> get props => [data, updateControllers];
 }
 
-class SearchData {
+class SearchData extends Equatable {
   final String searchText;
   final List<UserEntity> users;
 
-  SearchData({required this.searchText, required this.users});
+  const SearchData({required this.searchText, required this.users});
 
   SearchData copyWith({String? searchText, List<UserEntity>? users}) {
     return SearchData(
         searchText: searchText ?? this.searchText, users: users ?? this.users);
   }
+
+  @override
+  List<Object?> get props => [searchText, users];
 }

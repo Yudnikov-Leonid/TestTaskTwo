@@ -1,13 +1,14 @@
+import 'package:equatable/equatable.dart';
 import 'package:profile_app/features/login/data/login_ui_type.dart';
 
-class LoginData {
+class LoginData extends Equatable {
   final LoginUiType uiType;
   final String email;
   final String password;
   final String name;
   final String restore;
 
-  LoginData({
+  const LoginData({
     required this.uiType,
     required this.email,
     required this.password,
@@ -30,4 +31,7 @@ class LoginData {
       restore: restore ?? this.restore,
     );
   }
+
+  @override
+  List<Object?> get props => [uiType, email, password, name, restore];
 }

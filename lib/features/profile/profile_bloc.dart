@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
@@ -105,18 +106,31 @@ class ProfileEventSaveDescription extends ProfileEvent {
 
 class ProfileEventLoadImage extends ProfileEvent {}
 
-abstract class ProfileState {}
+abstract class ProfileState extends Equatable {
+  const ProfileState();
+}
 
-class ProfileStateLoading extends ProfileState {}
+class ProfileStateLoading extends ProfileState {
+  const ProfileStateLoading();
+
+  @override
+  List<Object?> get props => [];
+}
 
 class ProfileStateMessage extends ProfileState {
   final String message;
 
-  ProfileStateMessage(this.message);
+  const ProfileStateMessage(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class ProfileStateBase extends ProfileState {
   final UserEntity user;
 
-  ProfileStateBase(this.user);
+  const ProfileStateBase(this.user);
+
+  @override
+  List<Object?> get props => [user];
 }

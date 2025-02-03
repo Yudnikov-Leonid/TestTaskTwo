@@ -19,6 +19,7 @@ dependencies:
   synchronized: ^3.3.0+3
   image_picker: ^1.1.2
   cloudinary: ^1.2.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
