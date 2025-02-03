@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
+import 'package:profile_app/di.dart';
 import 'package:profile_app/features/login/data/login_data.dart';
 import 'package:profile_app/features/login/data/login_ui_type.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,8 +49,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(
           const LoginStateDialog('Link to verify is sent', 'Check your email'));
       _data = _data.copyWith(uiType: LoginUiAuth(), email: '', name: '');
-    } on FirebaseAuthException catch (e, st) {
-      print('e: ${e.message}, st: $st');
+    } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
         emit(const LoginStateMessage('The password provided is too weak.'));
       } else if (e.code == 'email-already-in-use') {
@@ -57,8 +58,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       } else {
         emit(LoginStateMessage(e.message ?? ''));
       }
-    } catch (e, st) {
-      print('e: $e, st: $st');
+    } catch (e) {
       emit(LoginStateMessage(e.toString()));
     }
     emit(LoginStateBase(_data, updateControllers: true));
@@ -88,8 +88,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       }
     } on FirebaseAuthException catch (e) {
       emit(LoginStateMessage(e.message ?? ''));
-    } catch (e, st) {
-      print('e: $e, st: $st');
+    } catch (e) {
       emit(LoginStateMessage(e.toString()));
     }
     emit(LoginStateBase(_data));
@@ -121,7 +120,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       FirebaseAuth.instance.signOut();
       GoogleSignIn().signOut();
     } catch (e) {
-      print('logout error: $e');
+      di.get<Logger>().e(e.toString(), error: e);
     }
   }
 

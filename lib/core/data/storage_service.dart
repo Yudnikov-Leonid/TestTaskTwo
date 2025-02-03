@@ -1,5 +1,7 @@
 import 'package:cloudinary/cloudinary.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logger/logger.dart';
+import 'package:profile_app/di.dart';
 
 import 'keys.dart';
 
@@ -24,17 +26,18 @@ class StorageServiceImpl implements StorageService {
           resourceType: CloudinaryResourceType.image,
           fileName: file.name.split('.').first,
           progressCallback: (count, total) {
-            print('Uploading image from file with progress: $count/$total');
+            di.get<Logger>().t('Uploading image from file with progress: $count/$total');
           });
 
       if (response.isSuccessful) {
-        print('url: ${response.secureUrl}');
+        di.get<Logger>().d('url: ${response.secureUrl}');
         return (response.secureUrl, true);
       } else {
+        di.get<Logger>().e('uploading error: ${response.error}');
         return (response.error ?? 'Error', false);
       }
     } catch (e) {
-      print('upload error: $e');
+      di.get<Logger>().e(e.toString(), error: e);
       return (e.toString(), true);
     }
   }

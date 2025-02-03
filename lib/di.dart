@@ -1,3 +1,4 @@
+import 'package:logger/logger.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
 import 'package:profile_app/core/data/storage_service.dart';
 import 'package:profile_app/features/login/presentation/login_bloc.dart';
@@ -11,6 +12,7 @@ class DI {
   Future init() async {
     _container.addAll({
       Lock: Lock(),
+      Logger: Logger()
     });
 
     _container.addAll({
