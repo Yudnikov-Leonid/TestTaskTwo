@@ -56,8 +56,8 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 70),
-              const Text('Profile App', style: TextStyle(fontSize: 30)),
+              const SizedBox(height: 60),
+              const Text('Profile App', textAlign: TextAlign.center, style: TextStyle(fontSize: 30)),
               const Expanded(child: SizedBox()),
               if (uiType is LoginUiRegister)
                 _registration()
@@ -82,12 +82,12 @@ class _LoginPageState extends State<LoginPage> {
           _emailTextField(),
           _passwordTextField(),
           _nameTextField(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           QButton('Register', () {
             if (!_registrationFormKey.currentState!.validate()) return;
             context.read<LoginBloc>().add(LoginEventRegister());
           }),
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
           _changeTypeButton('Have an account?', LoginUiAuth())
         ],
       ),
@@ -101,12 +101,12 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           _emailTextField(),
           _passwordTextField(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           QButton('Login', () {
             if (!_authFormKey.currentState!.validate()) return;
             context.read<LoginBloc>().add(LoginEventAuth());
           }),
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
           _changeTypeButton('Don\'t have an account?', LoginUiRegister()),
           _changeTypeButton('Restore password', LoginUiRestore())
         ],
@@ -120,12 +120,12 @@ class _LoginPageState extends State<LoginPage> {
       child: Column(
         children: [
           _emailTextField(),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           QButton('Send code', () {
             if (!_restoreFormKey.currentState!.validate()) return;
             context.read<LoginBloc>().add(LoginEventRestore());
           }),
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
           _changeTypeButton('Go back', LoginUiAuth()),
         ],
       ),
@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
         style: TextButton.styleFrom(
             minimumSize: Size.zero,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4)),
-        child: Text(text, style: TextStyle(color: Colors.blue.shade600)));
+        child: Text(text, textAlign: TextAlign.center, style: TextStyle(color: Colors.blue.shade600)));
   }
 
   final _emailValidator = EmptyUiValidator(next: EmailUiValidator());

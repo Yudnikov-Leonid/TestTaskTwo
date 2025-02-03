@@ -65,100 +65,102 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InkWell(
-              highlightColor: Colors.transparent,
-              splashColor: Colors.transparent,
-              onTap: () async {
-                _bloc.add(ProfileEventLoadImage());
+      child: SingleChildScrollView(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              InkWell(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                onTap: () async {
+                  _bloc.add(ProfileEventLoadImage());
+                },
+                child: _state.user.iconPath == null
+                    ? Container(
+                        height: 100,
+                        width: 100,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade300, shape: BoxShape.circle),
+                        child: const Icon(Icons.person,
+                            size: 60, color: Colors.grey),
+                      )
+                    : CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage(_state.user.iconPath!),
+                      ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => EditFieldDialog(
+                              title: 'Edit name',
+                              text: _state.user.name,
+                              onSave: (value) {
+                                _bloc.add(ProfileEventSaveName(value));
+                              }));
+                    },
+                    child: Text(_state.user.name,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                  ),
+                  InkWell(
+                    highlightColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => EditFieldDialog(
+                              title: 'Edit description',
+                              text: _state.user.description,
+                              multiline: true,
+                              onSave: (value) {
+                                _bloc.add(ProfileEventSaveDescription(value));
+                              }));
+                    },
+                    child: SizedBox(
+                        width: MediaQuery.sizeOf(context).width * 0.6,
+                        child: Text(
+                            _state.user.description.isEmpty
+                                ? 'No description'
+                                : _state.user.description,
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.grey))),
+                  ),
+                ],
+              )
+            ],
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text('press on element to edit',
+                style: TextStyle(color: Colors.grey.shade700)),
+          ),
+          const SizedBox(height: 40),
+          const Padding(
+            padding: EdgeInsets.only(left: 12),
+            child: Text('Actions',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
+          ),
+          TextButton(
+              onPressed: () {
+                context.read<LoginBloc>().add(LoginEventLogout());
               },
-              child: _state.user.iconPath == null
-                  ? Container(
-                      height: 100,
-                      width: 100,
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade300, shape: BoxShape.circle),
-                      child: const Icon(Icons.person,
-                          size: 60, color: Colors.grey),
-                    )
-                  : CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(_state.user.iconPath!),
-                    ),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InkWell(
-                  highlightColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => EditFieldDialog(
-                            title: 'Edit name',
-                            text: _state.user.name,
-                            onSave: (value) {
-                              _bloc.add(ProfileEventSaveName(value));
-                            }));
-                  },
-                  child: Text(_state.user.name,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold)),
-                ),
-                InkWell(
-                  highlightColor: Colors.transparent,
-                  splashColor: Colors.transparent,
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => EditFieldDialog(
-                            title: 'Edit description',
-                            text: _state.user.description,
-                            multiline: true,
-                            onSave: (value) {
-                              _bloc.add(ProfileEventSaveDescription(value));
-                            }));
-                  },
-                  child: SizedBox(
-                      width: MediaQuery.sizeOf(context).width * 0.6,
-                      child: Text(
-                          _state.user.description.isEmpty
-                              ? 'No description'
-                              : _state.user.description,
-                          style: const TextStyle(
-                              fontSize: 14, color: Colors.grey))),
-                ),
-              ],
-            )
-          ],
-        ),
-        const SizedBox(height: 16),
-        Center(
-          child: Text('press on element to edit',
-              style: TextStyle(color: Colors.grey.shade700)),
-        ),
-        const SizedBox(height: 40),
-        const Padding(
-          padding: EdgeInsets.only(left: 12),
-          child: Text('Actions',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17)),
-        ),
-        TextButton(
-            onPressed: () {
-              context.read<LoginBloc>().add(LoginEventLogout());
-            },
-            style: TextButton.styleFrom(
-                shape: const LinearBorder(),
-                alignment: Alignment.centerLeft,
-                foregroundColor: Colors.red,
-                minimumSize: const Size(double.infinity, 50)),
-            child: const Text('Log out'))
-      ]),
+              style: TextButton.styleFrom(
+                  shape: const LinearBorder(),
+                  alignment: Alignment.centerLeft,
+                  foregroundColor: Colors.red,
+                  minimumSize: const Size(double.infinity, 50)),
+              child: const Text('Log out'))
+        ]),
+      ),
     );
   }
 }

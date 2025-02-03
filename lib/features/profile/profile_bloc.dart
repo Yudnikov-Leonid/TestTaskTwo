@@ -40,7 +40,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   void onSaveName(
       ProfileEventSaveName event, Emitter<ProfileState> emit) async {
-    emit(const ProfileStateLoading());
     try {
       await _firestoreService.setName(event.name);
     } catch (e) {
@@ -51,7 +50,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   void onSaveDescription(
       ProfileEventSaveDescription event, Emitter<ProfileState> emit) async {
-    emit(const ProfileStateLoading());
     try {
       await _firestoreService.setDescription(event.description);
     } catch (e) {

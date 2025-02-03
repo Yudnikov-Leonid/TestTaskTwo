@@ -11,26 +11,28 @@ class UserInfoDialog extends StatelessWidget {
     return Dialog(
         child: Container(
       padding: const EdgeInsets.all(12),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Text(_user.name,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 2),
-        if (_user.iconPath != null)
-          Image.network(_user.iconPath!, height: 400, width: 400, fit: BoxFit.cover)
-        else
-          Container(
-            height: 200,
-            width: 200,
-            decoration: BoxDecoration(
-                color: Colors.grey.shade300, shape: BoxShape.circle),
-            child: const Icon(Icons.person, size: 140, color: Colors.grey),
-          ),
-        const SizedBox(height: 20),
-        Text(
-          _user.description.isEmpty ? 'No description' : _user.description,
-          style: const TextStyle(color: Colors.grey),
-        )
-      ]),
+      child: SingleChildScrollView(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(_user.name,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 2),
+          if (_user.iconPath != null)
+            Image.network(_user.iconPath!, height: 400, width: 400, fit: BoxFit.cover)
+          else
+            Container(
+              height: 200,
+              width: 200,
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade300, shape: BoxShape.circle),
+              child: const Icon(Icons.person, size: 140, color: Colors.grey),
+            ),
+          const SizedBox(height: 20),
+          Text(
+            _user.description.isEmpty ? 'No description' : _user.description,
+            style: const TextStyle(color: Colors.grey),
+          )
+        ]),
+      ),
     ));
   }
 }
