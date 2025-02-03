@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:equatable/equatable.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:profile_app/core/data/firestore_service.dart';
@@ -42,6 +44,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ProfileEventSaveName event, Emitter<ProfileState> emit) async {
     try {
       await _firestoreService.setName(event.name);
+      FirebaseAnalytics.instance.logEvent(
+        name: 'change_name',
+        parameters: {
+          'email': FirebaseAuth.instance.currentUser?.email ?? 'null',
+          'uid': FirebaseAuth.instance.currentUser?.uid ?? 'null',
+          'new_name': event.name,
+        },
+      );
     } catch (e) {
       emit(ProfileStateMessage(e.toString()));
     }
@@ -52,6 +62,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ProfileEventSaveDescription event, Emitter<ProfileState> emit) async {
     try {
       await _firestoreService.setDescription(event.description);
+      FirebaseAnalytics.instance.logEvent(
+        name: 'change_description',
+        parameters: {
+          'email': FirebaseAuth.instance.currentUser?.email ?? 'null',
+          'uid': FirebaseAuth.instance.currentUser?.uid ?? 'null',
+          'new_name': event.description,
+        },
+      );
     } catch (e) {
       emit(ProfileStateMessage(e.toString()));
     }

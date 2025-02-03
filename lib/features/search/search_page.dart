@@ -1,3 +1,5 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:profile_app/di.dart';
@@ -92,6 +94,14 @@ class _BodyState extends State<_Body> {
                 return ListTile(
                     title: InkWell(
                   onTap: () {
+                    FirebaseAnalytics.instance.logSelectContent(
+                      contentType: 'user',
+                      itemId: user.uid,
+                      parameters: {
+                        'email': FirebaseAuth.instance.currentUser?.email ?? 'null',
+                        'uid': FirebaseAuth.instance.currentUser?.uid ?? 'null',
+                      },
+                    );
                     showDialog(
                         context: context,
                         builder: (context) => UserInfoDialog(user));

@@ -43,7 +43,7 @@ class FirestoreServiceImpl implements FirestoreService {
     final userRef = _firestore
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser!.uid);
-    return userRef.snapshots().map((e) => UserEntity.fromJson(e.data()!));
+    return userRef.snapshots().map((e) => UserEntity.fromJson(e.data()!, e.id));
   }
 
   UserEntity? _userCache;
@@ -60,7 +60,7 @@ class FirestoreServiceImpl implements FirestoreService {
     if (data.data() == null && _userCache == null) {
       yield UserEntity.empty();
     } else {
-      yield UserEntity.fromJson(data.data()!);
+      yield UserEntity.fromJson(data.data()!, data.id);
     }
   }
 
@@ -96,7 +96,7 @@ class FirestoreServiceImpl implements FirestoreService {
       yield _usersCache;
     }
     final data = await _firestore.collection('users').get();
-    _usersCache = data.docs.map((e) => UserEntity.fromJson(e.data())).toList();
+    _usersCache = data.docs.map((e) => UserEntity.fromJson(e.data(), e.id)).toList();
     yield _usersCache;
   }
 

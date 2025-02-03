@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
@@ -44,6 +45,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       await FirebaseAuth.instance.currentUser?.sendEmailVerification();
       await _firestoreService
           .createUser(UserCreateData(name: _data.name, email: _data.email));
+      FirebaseAnalytics.instance
+          .logSignUp(signUpMethod: 'email_password', parameters: {
+        'email': _data.email,
+        'id': FirebaseAuth.instance.currentUser?.uid ?? 'null',
+        'name': _data.name,
+      });
       await FirebaseAuth.instance.signOut();
 
       emit(
@@ -82,6 +89,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
             password: '',
             name: '',
             restore: '');
+        FirebaseAnalytics.instance.logLogin(
+            loginMethod: 'email_password',
+            parameters: {
+              'email': cred.user?.email ?? 'null',
+              'id': cred.user?.uid ?? 'null'
+            });
       } else {
         await FirebaseAuth.instance.signOut();
         emit(const LoginStateMessage('Verify your email'));
@@ -105,6 +118,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: _data.email);
       emit(const LoginStateDialog('Link is sent', 'Check your email'));
+      FirebaseAnalytics.instance.logEvent(
+        name: 'restore_password',
+        parameters: {
+          'email': _data.email,
+        },
+      );
       _data = _data.copyWith(uiType: LoginUiAuth());
     } on FirebaseAuthException catch (e) {
       emit(LoginStateMessage(e.message ?? ''));
@@ -117,6 +136,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   void onLoginEventLogout(
       LoginEventLogout event, Emitter<LoginState> emit) async {
     try {
+      FirebaseAnalytics.instance.logEvent(
+        name: 'logout',
+        parameters: {
+          'email': _data.email,
+          'uid': FirebaseAuth.instance.currentUser?.uid ?? 'null'
+        },
+      );
       FirebaseAuth.instance.signOut();
       GoogleSignIn().signOut();
     } catch (e) {
